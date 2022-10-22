@@ -3,106 +3,59 @@ import java.util.Scanner;
 import java.io.*;
 
 public class Client {
- 
 
   public static void main(String[] args) throws Exception {
     try {
       Socket socket = new Socket("localhost", 9999);
       DataInputStream inStream = new DataInputStream(socket.getInputStream());
       DataOutputStream outStream = new DataOutputStream(socket.getOutputStream());
-      // BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
       Scanner sc = new Scanner(System.in);
       String clientMessage = "", serverMessage = "", fn = "";
-      boolean check;
       while (!clientMessage.equals("bye")) {
-        /* start 1 cilent get from server */
         System.out.println("[ ================================================================ ]");
         serverMessage = inStream.readUTF(); 
         System.out.println(serverMessage);
         System.out.println("[ ================================================================ ]");
-        /* end 1 cilent get from server */
 
-        /* strat 2 cilent send to server */
-        System.out.print("Clinet input : ");
-        clientMessage = sc.nextLine(); // for input form keyboard
-        outStream.writeUTF(clientMessage);
-        if (clientMessage.equals("1")) {
-          fn = "BLACKPINK";
-        } else if (clientMessage.equals("2")) {
-          fn = "JAPAN";
-        } else if (clientMessage.equals("3")) {
-          fn = "GAME";
-        } else {
-          fn = clientMessage;
-        }
-        System.out.println(clientMessage);
-        outStream.flush();
-        /* end 2 cilent send to server */
+        /*start 2 client get message from server */
+        outStream.writeUTF(sc.nextLine());
+        /*start 2 client get message from server */
 
-        /* strat 3 cilent get to server */
-        serverMessage = inStream.readUTF();
-        check = inStream.readBoolean();
-        System.out.println("SERVER REPLY : " + serverMessage + " Status : " + check);
-        /* end 3 cilent get to server */
+        /*start 3 client get message from server */
+        System.out.println(inStream.readUTF());
+        boolean check = inStream.readBoolean();
+        String file_name =inStream.readUTF();
+        /*start 3 client get message from server */
 
-        /* 4 download file form server */
-
-        if (check == true) {
-          System.out.print("REPLY yes OR no: ");
-          clientMessage = sc.nextLine();
-          outStream.writeUTF(clientMessage);
-          if (clientMessage.equalsIgnoreCase("yes")) {
-            System.out.println("FILE NEAME : " + fn);
-            downdloadThread DL_file = new downdloadThread(socket, fn);
-            for (int i = 0; i < 10; ++i) {
-              String str = i + "";
-              Thread tr = new Thread(DL_file, str);
-              tr.start();
-              tr.join();
-            }
-          } else {
-            continue;
+        /*get file normal Send*/
+        if (check==true){
+          int bytes = 0;
+          FileOutputStream fileOutputStream = new FileOutputStream("C:/Users/aumra/OneDrive/เดสก์ท็อป/psc/keep_client_file/"+file_name);
+          long size = inStream.readLong();     // read file size
+          byte[] buffer = new byte[10*1024];
+          double sum=0;
+          double size_exis = size;
+          // System.out.print(size);
+          while (size > 0 && (bytes = inStream.read(buffer, 0, (int)Math.min(buffer.length, size))) != -1) {
+              sum+=bytes;
+              System.out.println("Client get file :"+String.format("%.2f",(sum)/size_exis*100)+" %");
+              fileOutputStream.write(buffer,0,bytes);
+              size -= bytes;      // read upto file size
           }
+          System.out.println("successfully get size file :"+String.format("%.2f",size_exis/(1024*1024))+" MB");
+          fileOutputStream.close();
         }
-        /* 4 download file form server */
+
+        /*get file zoro copy*/
+
       }
-      inStream.close();
-      outStream.close();
-      socket.close();
     } catch (IOException e) {
       System.out.println(e);
     } finally {
       System.out.println("is closed");
     }
   }
-}
-
-class downdloadThread implements Runnable {
-  Socket socket;
-  String file_name;
-
-  downdloadThread(Socket socket, String file_name) {
-    this.socket = socket;
-    this.file_name = file_name;
-  }
-  public void run() {
-    try {
-      System.out.println("Clinet : dowdloading. . . . " + file_name + " with thread " + Thread.currentThread().getName());
-      InputStream is = socket.getInputStream();
-      // int bufferSize = socket.getReceiveBufferSize();
-      // System.out.println(bufferSize);
-      FileOutputStream fos = new FileOutputStream("C:/Users/aumra/OneDrive/เดสก์ท็อป/psc/keep_client_file/" + file_name + ".mp4");///* */
-      BufferedOutputStream bos = new BufferedOutputStream(fos);
-      byte[] bytes = new byte[10048576];
-      int count = 0;
-      while ((count = is.read(bytes)) >= 0) {
-        bos.write(bytes, 0, count);
-      }
-      bos.close();
-      is.close();
-    } catch (Exception e) {
-      System.out.println(e);
-    }
-  }
 
 }
+
+

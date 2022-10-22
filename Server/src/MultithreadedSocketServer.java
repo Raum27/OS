@@ -21,10 +21,11 @@ public class MultithreadedSocketServer {
     }
 }
 
-class ServerClientThread implements Runnable{
+class ServerClientThread implements Runnable {
     Socket serverClient;
     int clientNo;
-
+    DataInputStream inStream;
+    DataOutputStream outStream;
     ServerClientThread(Socket inSocket, int counter) {
         serverClient = inSocket;
         clientNo = counter;
@@ -35,69 +36,43 @@ class ServerClientThread implements Runnable{
         try {
             String clientMessage = "", serverMessage = "", fn = "";
             boolean check = false; // HERE EDIT
-            DataInputStream inStream = new DataInputStream(serverClient.getInputStream());
-            DataOutputStream outStream = new DataOutputStream(serverClient.getOutputStream());
+            inStream = new DataInputStream(serverClient.getInputStream());
+            outStream = new DataOutputStream(serverClient.getOutputStream());
             while (!clientMessage.equals("bye")) {
                 /* start 1 server send from client */
-                serverMessage = "          Hello Client we have 3 files for download  \n--->        1.BLACKPINK\n--->        2.JAPAN\n--->        3.GAME\n";
+                serverMessage = "          Hello Client we have 3 files for download  \n--->        1.BLACKPINK\n--->        2.GAME\n--->        3.JAPAN\n";
                 serverMessage += "         PRESS 1 2 3 OR type name file";
-                outStream.writeUTF(serverMessage); 
-                outStream.flush();
+                outStream.writeUTF(serverMessage);
                 /* end 1 server send from client */
 
-                /* start 2 server send to client */
-                clientMessage = inStream.readUTF();
-                System.out.println("Client no Message - " + clientNo + " : " + clientMessage);
-                /* end 2 server get to client */
-                /*find something what client want */
-                String filename[] = { "BLACKPINK", "JAPAN", "GAME" };
-                String number[] = { "1", "2", "3" };
-                for (int i = 0; i < 3; ++i) {
-                    if (clientMessage.equalsIgnoreCase(filename[i]) || clientMessage.equalsIgnoreCase(number[i])) {
-                        serverMessage = "this "+ filename[i]+" flie that you want download yes OR no";
-                        fn = filename[i];
-                        System.out.println("SERVER : SEND FILE " + fn);
-                        check = true;
-                        break;
-                    }else{
-                        serverMessage = "this "+ clientMessage +" No mome file";
-                        check = false;
-                    }
-                }
-                /*find something what client want */
-                /* start 3 server get to client */
-                outStream.writeUTF(serverMessage);
-                outStream.writeBoolean(check);
-                outStream.flush();
-                /* end 3 server send to client */
+                /* start 2 server get message from client */
+                clientMessage=inStream.readUTF();
+                System.out.println("Client -" + clientNo +" Message: "+clientMessage);
+                /* start 2 server get message from client */
 
-                /* 4 send file to client */
-                if (check == true) {
-                    clientMessage = inStream.readUTF();
-                    if (clientMessage.equalsIgnoreCase("yes")) {
-                        String file_name = fn.toUpperCase();
-                        File myfile = new File("../" + file_name + ".mp4"); //////////////////////
-                        byte brr[] = new byte[10048576];
-                        System.out.println( brr.length);
-                        System.out.println("SERVER :file size : " + myfile.length() + " of " + file_name);
-                        FileInputStream fis = new FileInputStream(myfile);
-                        BufferedInputStream bis = new BufferedInputStream(fis);
-                        BufferedOutputStream out = new BufferedOutputStream(serverClient.getOutputStream());
-                        int count;
-                        double sum=0;
-                        while ((count = bis.read(brr)) > 0) {
-                            sum+=count;
-                            System.out.println("Server send file :"+String.format("%.2f",(sum)/myfile.length()*100)+" %");
-                            out.write(brr, 0, count);
-                            
-                        }
-                        fis.close();
-                        bis.close();
-                        out.close();
-                        System.out.println("SERVER :sending file to client . . .");
-                    }
+                /*Send file */
+                if (clientMessage.equals("1")||clientMessage.equalsIgnoreCase("BLACKPINK")){
+                    outStream.writeUTF("Sending file BLACKPINK.mp4 to Clinet . . .");
+                    outStream.writeBoolean(true);
+                    outStream.writeUTF("BLACKPINK.mp4");
+                    sendFile("C:/Users/aumra/OneDrive/เดสก์ท็อป/psc/Server/BLACKPINK.mp4");
+                }else if(clientMessage.equals("2")||clientMessage.equalsIgnoreCase("GAME")){
+                    outStream.writeUTF("Sending file GAME.mp4 to Clinet . . .");
+                    outStream.writeBoolean(true);
+                    outStream.writeUTF("GAME.mp4");
+                    sendFile("C:/Users/aumra/OneDrive/เดสก์ท็อป/psc/Server/GAME.mp4");
+                }else if(clientMessage.equals("3")||clientMessage.equalsIgnoreCase("JAPAN")){
+                    outStream.writeUTF("Sending file JAPAN.mp4 to Clinet . . .");
+                    outStream.writeBoolean(true);
+                    outStream.writeUTF("JAPAN.mp4");
+                    sendFile("C:/Users/aumra/OneDrive/เดสก์ท็อป/psc/Server/JAPAN.mp4");
+                }else {
+                    outStream.writeUTF("not found file what you want");
+                    outStream.writeBoolean(false);
+                    outStream.writeUTF("Noflie");
+                    continue;
                 }
-                /* 4 send file to client */
+
             }
             inStream.close();
             outStream.close();
@@ -107,5 +82,24 @@ class ServerClientThread implements Runnable{
         } finally {
             System.out.println("Client -" + clientNo + " exit!! ");
         }
+    }
+
+    public void sendFile(String path) throws Exception{
+        int bytes = 0;
+        File file = new File(path);
+        FileInputStream fileInputStream = new FileInputStream(file);
+        
+        // send file size
+        outStream.writeLong(file.length());  
+        // break file into chunks
+        double sum=0;
+        byte[] buffer = new byte[10*1024];
+        while ((bytes=fileInputStream.read(buffer))!=-1){
+            sum+=bytes;
+            System.out.println("Server send file :"+String.format("%.2f",(sum)/file.length()*100)+" %");
+            outStream.write(buffer,0,bytes);
+            outStream.flush();
+        }
+        fileInputStream.close();
     }
 }
