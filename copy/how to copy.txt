@@ -1,0 +1,2 @@
+java JioChanel BLACKPINK.mp4 JAPAN.mp4 [1,2] เลือกเอาตัวใดตัวนึง
+ต้องมีไฟล์อย่างน้อย 2 ตัวในนั้น
