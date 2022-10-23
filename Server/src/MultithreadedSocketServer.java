@@ -6,7 +6,7 @@ import java.nio.channels.FileChannel;
 public class MultithreadedSocketServer {
     public static void main(String[] args) throws Exception {
         try {
-            ServerSocket server = new ServerSocket(9999);
+            ServerSocket server = new ServerSocket(7999);
             int counter = 0;
             System.out.println("Server Started ....");
             while (true) {
@@ -58,34 +58,39 @@ class ServerClientThread implements Runnable {
                     outStream.writeUTF("BLACKPINK.mp4");
                     outStream.writeBoolean(false);
                     sendFile("C:/Users/aumra/OneDrive/เดสก์ท็อป/psc/Server/BLACKPINK.mp4");
+                    System.out.println("Server : send file to "+"Client -" + clientNo+" complete");   /** */
                 } else if (clientMessage.equals("2") || clientMessage.equalsIgnoreCase("GAME")) {
                     outStream.writeUTF("Sending file GAME.mp4 to Clinet . . .");
                     outStream.writeBoolean(true);
                     outStream.writeUTF("GAME.mp4");
                     outStream.writeBoolean(false);
                     sendFile("C:/Users/aumra/OneDrive/เดสก์ท็อป/psc/Server/GAME.mp4");
+                    System.out.println("Server : send file to "+"Client -" + clientNo+" complete");   /** */
                 } else if (clientMessage.equals("3") || clientMessage.equalsIgnoreCase("JAPAN")) {
                     outStream.writeUTF("Sending file JAPAN.mp4 to Clinet . . .");
                     outStream.writeBoolean(true);
                     outStream.writeUTF("JAPAN.mp4");
                     outStream.writeBoolean(false);
                     sendFile("C:/Users/aumra/OneDrive/เดสก์ท็อป/psc/Server/JAPAN.mp4");
+                    System.out.println("Server : send file to "+"Client -" + clientNo+" complete");   /** */
                 } else if(clientMessage.equals("-1")){      /**Zero copy */
                     outStream.writeUTF("Sending file BLACKPINK.mp4 to Clinet . . .");
                     outStream.writeBoolean(true);
                     outStream.writeUTF("BLACKPINK.mp4"); 
                     outStream.writeBoolean(true);
+                    System.out.println("Server : send file to "+"Client -" + clientNo+" complete");   /** */
                 }else if(clientMessage.equals("-2")){
                     outStream.writeUTF("Sending file GAME.mp4 to Clinet . . .");
                     outStream.writeBoolean(true);
                     outStream.writeUTF("GAME.mp4"); 
                     outStream.writeBoolean(true);
-
+                    System.out.println("Server : send file to "+"Client -" + clientNo+" complete");   /** */
                 }else if(clientMessage.equals("-3")){
                     outStream.writeUTF("Sending file JAPAN.mp4 to Clinet . . .");
                     outStream.writeBoolean(true);
                     outStream.writeUTF("JAPAN.mp4"); 
                     outStream.writeBoolean(true);               /**Zero copy */
+                    System.out.println("Server : send file to "+"Client -" + clientNo+" complete");   /** */
                 }else {
                     outStream.writeUTF("not found file what you want");
                     outStream.writeBoolean(false);
@@ -93,7 +98,6 @@ class ServerClientThread implements Runnable {
                     outStream.writeBoolean(false);
                     continue;
                 } 
-
             }
             inStream.close();
             outStream.close();
@@ -104,7 +108,6 @@ class ServerClientThread implements Runnable {
             System.out.println("Client -" + clientNo + " exit!! ");
         }
     }
-
     public void sendFile(String path) throws Exception {
         int bytes = 0;
         File file = new File(path);
