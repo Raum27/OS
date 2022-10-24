@@ -6,7 +6,7 @@ import java.nio.channels.FileChannel;
 public class Client {
   public static void main(String[] args) throws Exception {
     try {
-      Socket socket = new Socket("localhost", 7999);
+      Socket socket = new Socket("192.168.56.1", 7999);
       DataInputStream inStream = new DataInputStream(socket.getInputStream());
       DataOutputStream outStream = new DataOutputStream(socket.getOutputStream());
       Scanner sc = new Scanner(System.in);
@@ -32,8 +32,7 @@ public class Client {
         /* get file normal Send */
         if (check == true && check_zero==false) {
           int bytes = 0;
-          FileOutputStream fileOutputStream = new FileOutputStream(
-              "C:/Users/aumra/OneDrive/เดสก์ท็อป/psc/keep_client_file/" + file_name);
+          FileOutputStream fileOutputStream = new FileOutputStream("/home/aum/Desktop/VM/Keepfile_client/"  + file_name);
           long size = inStream.readLong(); // read file size
           byte[] buffer = new byte[10 * 1024];
           double sum = 0;
@@ -51,14 +50,15 @@ public class Client {
           fileOutputStream.close();
           long end = System.currentTimeMillis();
           long time = end - start;
-          System.out.println("Time send normal : " + time / 1000 + " second");
+          System.out.println("Time normal send  : " + time / 1000 + " second");
         }
         /* get file zoro copy */
         if (check == true &&check_zero == true) {
-          String path = "C:/Users/aumra/OneDrive/เดสก์ท็อป/psc/Server/" + file_name;
+          String path = "/media/sf_Server/"+ file_name;
+          System.out.println("Path check : "+path);
           long start = System.currentTimeMillis();
           zeroCopy(path, file_name);
-          System.out.println("Time send normal : " + (System.currentTimeMillis()-start) / 1000 + " second");
+          System.out.println("Time normal send : " + (System.currentTimeMillis()-start)/ 1000 + " second");
         }
 
       }
@@ -74,7 +74,7 @@ public class Client {
     FileChannel destination = null;
     try {
       source = new FileInputStream(path).getChannel();
-      destination = new FileOutputStream("C:/Users/aumra/OneDrive/เดสก์ท็อป/psc/keep_client_file/" + file_name).getChannel();
+      destination = new FileOutputStream("/home/aum/Desktop/VM/Keepfile_client/"+ file_name).getChannel();
       source.transferTo(0, source.size(), destination);
     } finally {
       if (source != null) {
